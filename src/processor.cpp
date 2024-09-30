@@ -11,6 +11,7 @@
  */
 #include <vector>
 #include <iostream>
+#include <stdexcept>
 
 class Processor
 {
@@ -44,10 +45,6 @@ private:
 
     void execute(int instruction)
     {
-        int operation;
-        int v_fi_reg; 
-        int v_se_reg;
-
         switch(instruction)
         {
         case 0:
@@ -55,10 +52,25 @@ private:
             _pr_ct += 3;
             break;
         case 1:
-            operation = _run_prg.at(_pr_ct + 1);
-            v_fi_reg; 
-            v_se_reg;
-            switch (operation)
+            exe_bi_operation(instruction);
+            _pr_ct += 4;
+            break;
+        case 2:
+            _regs.at(_run_prg.at(instruction + 1)) = _res;
+            _pr_ct += 2;
+            break;
+        default:
+            throw 500;
+        }
+    }
+
+    void exe_bi_operation(int instruction)
+    {
+        int operation = _run_prg.at(_pr_ct + 1);
+        int v_fi_reg;
+        int v_se_reg;
+
+        switch (operation)
             {
             case 1:
                 v_fi_reg = _regs.at(_run_prg.at(_pr_ct + 2));
@@ -70,17 +82,15 @@ private:
                 v_se_reg = _regs.at(_run_prg.at(instruction + 3));
                 _res = v_fi_reg - v_se_reg;
                 break;
+            default:
+                throw 501;
             }
-            _pr_ct += 4;
-            break;
-        case 2:
-            _regs.at(_run_prg.at(instruction + 1)) = _res;
-            _pr_ct += 2;
-            break;
-        }
     }
 };
 
+/*
+ * TODO error when enter a invali register id
+ */
 int main()
 {
     Processor p { };
@@ -88,9 +98,20 @@ int main()
         0, 0, 20,    // LOAD R0 with value 20
         0, 1, 22,    // LOAD R1 with value 22
         1, 1, 0, 1,  // EXECUTE operation 1 to R0 and R1
-        2, 2        // store result to R2
+        2, 2         // store result to R2
     };
-    p.run(program);
+
+    try
+    {
+        p.run(program);
+    }
+    catch(int error_code)
+    {
+        std::cout << "Wrong instruction\n";
+        std::cout << "Error code: " << error_code << "\n";
+        return 1;
+    }
+    
     std::cout << p.get_res() << "\n";
 }
 
