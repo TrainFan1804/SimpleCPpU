@@ -88,14 +88,11 @@ private:
     }
 };
 
-/*
- * TODO error when enter a invali register id
- */
 int main()
 {
     Processor p { };
     std::vector<int> program = {
-        0, 0, 20,    // LOAD R0 with value 20
+        0, 7, 20,    // LOAD R0 with value 20
         0, 1, 22,    // LOAD R1 with value 22
         1, 1, 0, 1,  // EXECUTE operation 1 to R0 and R1
         2, 2         // store result to R2
@@ -104,6 +101,11 @@ int main()
     try
     {
         p.run(program);
+    }
+    catch (const std::out_of_range &e)
+    {
+        std::cout << "Invalid register id\n";
+        return 1;
     }
     catch(int error_code)
     {
